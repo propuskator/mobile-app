@@ -1,0 +1,13 @@
+require 'dotenv'
+Dotenv.load('../.env')
+Dotenv.load('../../.build.env')
+
+git_url(ENV['CERTIFICATES_REPO'])
+
+type("development") # The default type, can be: appstore, adhoc, enterprise or development
+
+# app_identifier(ENV['BUNDLE_ID'])
+# username("user@fastlane.tools") # Your Apple Developer Portal username
+
+# For all available options run `fastlane match --help`
+# Remove the # in the beginning of the line to enable the other options

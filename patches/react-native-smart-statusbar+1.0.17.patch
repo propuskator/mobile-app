@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-native-smart-statusbar/index.js b/node_modules/react-native-smart-statusbar/index.js
+index 459f02f..2d548c5 100644
+--- a/node_modules/react-native-smart-statusbar/index.js
++++ b/node_modules/react-native-smart-statusbar/index.js
+@@ -16,7 +16,7 @@ class SafeAreaDecider extends PureComponent {
+ 	componentDidMount = async () => {
+ 		const deviceHaveNotch = await DeviceInfo.hasNotch()
+ 		if (Platform.OS === 'ios') {
+-			const iosHeight = deviceHaveNotch ? 44: 20
++			const iosHeight = deviceHaveNotch ? 48: 20
+ 			this.setState({navbarHeight: iosHeight, deviceHaveNotch: deviceHaveNotch})
+ 		} else if (Platform.OS === 'android') {
+ 			this.setState({navbarHeight: StatusBar.currentHeight, deviceHaveNotch: deviceHaveNotch})

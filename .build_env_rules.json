@@ -1,0 +1,11 @@
+{
+    "APPLE_ID"                 : [ "required" ],
+    "TEAM_NAME"                : [ "required" ],
+    "TEAM_ID"                  : [ "required" ],
+    "CERTIFICATES_REPO"        : [ "required" ],
+    "FIREBASE_ANDROID_APP_ID"  : [ "required" ],
+    "FIREBASE_CLI_TOKEN"       : [ "required" ],
+    "FIREBASE_TESTERS"         : [ "required" ],
+    "TELEGRAM_BOT_TOKEN"       : [ "string" ],
+    "TELEGRAM_CHAT_ID"         : [ "string" ]
+}

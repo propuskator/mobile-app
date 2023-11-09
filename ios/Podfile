@@ -1,0 +1,44 @@
+require_relative '../node_modules/react-native/scripts/react_native_pods'
+require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
+
+platform :ios, '10.0'
+
+target 'accesscontrol' do
+  config = use_native_modules!
+  pod 'Firebase/Analytics'
+  use_react_native!(:path => config["reactNativePath"])
+  # pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
+
+  pod 'RNExitApp', :path => '../node_modules/react-native-exit-app'
+
+  pod 'TouchID', :path => '../node_modules/react-native-touch-id'
+
+  pod 'react-native-background-timer', :path => '../node_modules/react-native-background-timer'
+
+  pod 'react-native-vlc-media-player', :path => '../node_modules/react-native-vlc-media-player'
+
+  pod 'react-native-cameraroll', :path => '../node_modules/@react-native-community/cameraroll'
+
+  target 'accesscontrolTests' do
+    inherit! :complete
+    # Pods for testing
+  end
+
+  # Enables Flipper.
+  #
+  # Note that if you have use_frameworks! enabled, Flipper will not work and
+  # you should disable these next few lines.
+  use_flipper!
+  post_install do |installer|
+    flipper_post_install(installer)
+  end
+end
+
+target 'accesscontrol-tvOS' do
+  # Pods for accesscontrol-tvOS
+
+  target 'accesscontrol-tvOSTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+end

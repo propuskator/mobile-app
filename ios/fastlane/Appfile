@@ -1,0 +1,15 @@
+require 'dotenv'
+Dotenv.load('../.env')
+Dotenv.load('../../.build.env')
+
+app_identifier(ENV['BUNDLE_ID']) # The bundle identifier of your app
+apple_id(ENV['APPLE_ID']) # Your Apple email address
+
+# You can uncomment the lines below and add your own
+# team selection in case you're in multiple teams
+team_name ENV['TEAM_NAME']
+team_id ENV['TEAM_ID']
+
+# For more information about the Appfile, see:
+#     https://docs.fastlane.tools/advanced/#appfile
+

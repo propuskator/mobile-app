@@ -1,0 +1,66 @@
+diff --git a/node_modules/react-native-elements/src/searchbar/SearchBar-android.js b/node_modules/react-native-elements/src/searchbar/SearchBar-android.js
+index 9ab7ce3..6047d5c 100644
+--- a/node_modules/react-native-elements/src/searchbar/SearchBar-android.js
++++ b/node_modules/react-native-elements/src/searchbar/SearchBar-android.js
+@@ -7,25 +7,28 @@ import { nodeType, renderNode } from '../helpers';
+ import Input from '../input/Input';
+ import Icon from '../icons/Icon';
+ 
+-const defaultSearchIcon = (theme) => ({
++const defaultSearchIcon = (theme, style) => ({
+   type: 'material',
+   size: 25,
+   color: theme.colors.platform.android.grey,
+   name: 'search',
++  ...style
+ });
+ 
+-const defaultCancelIcon = (theme) => ({
++const defaultCancelIcon = (theme, style) => ({
+   type: 'material',
+   size: 25,
+   color: theme.colors.platform.android.grey,
+   name: 'arrow-back',
++  ...style
+ });
+ 
+-const defaultClearIcon = (theme) => ({
++const defaultClearIcon = (theme, style) => ({
+   type: 'material',
+   size: 25,
+   color: theme.colors.platform.android.grey,
+   name: 'clear',
++  ...style
+ });
+ 
+ class SearchBar extends Component {
+@@ -88,6 +91,7 @@ class SearchBar extends Component {
+       cancelIcon,
+       showLoading,
+       loadingProps,
++      cancelButtonStyles,
+       ...attributes
+     } = this.props;
+     const { hasFocus, isEmpty } = this.state;
+@@ -116,10 +120,10 @@ class SearchBar extends Component {
+           leftIcon={
+             hasFocus
+               ? renderNode(Icon, cancelIcon, {
+-                  ...defaultCancelIcon(theme),
++                  ...defaultCancelIcon(theme, cancelButtonStyles),
+                   onPress: this.cancel,
+                 })
+-              : renderNode(Icon, searchIcon, defaultSearchIcon(theme))
++              : renderNode(Icon, searchIcon, defaultSearchIcon(theme, cancelButtonStyles))
+           }
+           leftIconContainerStyle={StyleSheet.flatten([
+             styles.leftIconContainerStyle,
+@@ -136,7 +140,7 @@ class SearchBar extends Component {
+               )}
+               {!isEmpty &&
+                 renderNode(Icon, clearIcon, {
+-                  ...defaultClearIcon(theme),
++                  ...defaultClearIcon(theme, cancelButtonStyles),
+                   key: 'cancel',
+                   onPress: this.clear,
+                 })}

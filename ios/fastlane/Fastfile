@@ -1,0 +1,134 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+require 'dotenv'
+Dotenv.load('../.env')
+Dotenv.load('../../.build.env')
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Build App and push a it to the Firebase"
+  lane :firebase_deploy do
+    packageJson = load_json(json_path: "../package.json")
+    text = "New iOS build of '#{ENV['DISPLAY_NAME']}' was successfully uploaded to the Firebase.\n"\
+          "Changes: #{ENV["BUILD_COMMENT"]} \n"\
+          "Version: #{packageJson["version"]}\n"\
+          "Build: #{ENV["BUILD_VERSION"]}\n"\
+          "Ready for testing."
+
+    # bump_version_code
+
+    update_app_identifier(
+      xcodeproj: ENV['APP_NAME'] + ".xcodeproj",
+      plist_path: ENV['APP_NAME'] + "/Info.plist",
+      app_identifier: ENV['BUNDLE_ID']
+    )
+
+    match(type: "adhoc")
+    register_devices(devices_file: "devices.txt")
+    sync_code_signing(force_for_new_devices: true, type: "adhoc")
+    sync_version
+
+    build_app(scheme: ENV['APP_NAME'])
+
+    firebase_app_distribution(
+      app: ENV['FIREBASE_IOS_APP_ID'],
+      firebase_cli_token: ENV['FIREBASE_CLI_TOKEN'],
+      testers: ENV['FIREBASE_TESTERS']
+    )
+    
+    send_message(text: text)
+  end
+
+
+
+
+
+  desc "Sync version with package.json"
+  lane :sync_testflight_version do
+    packageJson = load_json(json_path: "../package.json")
+    increment_version_number_in_plist(
+      version_number: packageJson["ios_version"],
+      scheme: ENV['APP_NAME']
+    )
+    increment_build_number_in_plist(
+      build_number: packageJson["build"].to_s,
+      scheme: ENV['APP_NAME']
+    )
+  end
+
+
+  desc "Push a new release build to testflight"
+  lane :upload_to_tf do
+    packageJson = load_json(json_path: "../package.json")
+
+    text = "New RELEASE ios build of '#{ENV['DISPLAY_NAME']}' was successfully uploaded to the TESTFLIGHT.\n"\
+    "Version: #{packageJson["ios_version"]}\n"\
+    "Build: #{packageJson["build"]}\n"\
+    "Ready for testing."
+
+    icon
+    match(type: "appstore")
+    sync_testflight_version
+    build_app(scheme: ENV['APP_NAME'])
+    upload_to_testflight
+    send_message(text: text)
+  end
+
+
+
+
+  desc "Make icons"
+  lane :icon do
+    appicon(appicon_image_file: '../ios-icon.png',
+      appicon_devices: [:iphone, :ios_marketing, :ipad],
+      appicon_path: ENV['APP_NAME'] + '/Images.xcassets')
+  end
+  
+  desc "Sync version with package.json"
+  lane :sync_version do
+    packageJson = load_json(json_path: "../package.json")
+    increment_version_number_in_plist(
+      version_number: packageJson["version"],
+      scheme: ENV['APP_NAME']
+    )
+    increment_build_number_in_plist(
+      build_number: ENV["BUILD_VERSION"].to_s,
+      scheme: ENV['APP_NAME']
+    )
+  end
+
+  desc "Send message to telegram group"
+  lane :send_message do |options|
+    telegram(
+        token: ENV['TELEGRAM_BOT_TOKEN'],
+        chat_id: ENV['TELEGRAM_CHAT_ID'],
+        text: options[:text]
+    )
+  end
+
+  desc "Create iOS app"
+  lane :create_ios_app do
+    produce(
+      username: ENV['APPLE_ID'],
+      app_identifier: ENV['BUNDLE_ID'],
+      app_name: ENV['DISPLAY_NAME'],
+      language: 'English',
+      app_version: '0.0.1',
+      sku: ENV['BUNDLE_ID']
+    )
+  end
+end

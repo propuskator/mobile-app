@@ -1,0 +1,12 @@
+diff --git a/node_modules/react-native-tip/src/TipProvider.js b/node_modules/react-native-tip/src/TipProvider.js
+index e798fe3..c857902 100644
+--- a/node_modules/react-native-tip/src/TipProvider.js
++++ b/node_modules/react-native-tip/src/TipProvider.js
+@@ -447,7 +447,6 @@ export default class TipProvider extends Component {
+             >
+                 {this.renderOverlay()}
+                 {this.renderTip()}
+-                {this.renderItem()}
+             </Modal>
+         )
+     }

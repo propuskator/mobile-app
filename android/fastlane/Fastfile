@@ -1,0 +1,115 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+require 'dotenv'
+Dotenv.load('../../.env')
+Dotenv.load('../../.build.env')
+
+default_platform(:android)
+
+platform :android do
+
+  desc "Increment version code"
+  lane :bump_version_code do
+    path = '../app/build.gradle'
+    re = /versionCode\s+(\d+)/ 
+
+    s = File.read(path)
+    versionCode = s[re, 1].to_i
+    s[re, 1] = (ENV["BUILD_VERSION"]).to_s
+
+    f = File.new(path, 'w')
+    f.write(s)
+    f.close
+  end
+
+  desc "Make icons"
+  lane :icon do
+    android_appicon(
+      appicon_image_file: '../android-icon.png',
+      appicon_icon_types: [:launcher],
+      appicon_path: 'app/src/main/res/mipmap',
+      generate_rounded: true
+    )
+    android_appicon(
+      appicon_image_file: '../android-icon.png',
+      appicon_icon_types: [:notification],
+      appicon_path: 'app/src/main/res/drawable',
+      appicon_filename: 'ic_notification',
+      generate_rounded: true
+    )
+  end
+
+  desc "Send message to telegram group"
+  lane :send_message do |options|
+    telegram(
+        token: ENV['TELEGRAM_BOT_TOKEN'],
+        chat_id: ENV['TELEGRAM_CHAT_ID'],
+        text: options[:text]
+    )
+  end
+
+  desc "Deploy a new version to the Firebase"
+  lane :firebase_deploy do
+    packageJson = load_json(json_path: "../package.json")
+    text = "New android build of '#{ENV['DISPLAY_NAME']}' was successfully uploaded to the Firebase.\n"\
+          "Changes: #{ENV["BUILD_COMMENT"]} \n"\
+          "Version: #{packageJson["version"]}\n"\
+          "Build: #{ENV["BUILD_VERSION"]}\n"\
+          "Ready for testing."
+
+    gradle(
+      task: "clean assembleRelease",
+      properties:{
+        "versionCode" => ENV["BUILD_VERSION"]
+      }
+    )
+
+    firebase_app_distribution(
+      app: ENV['FIREBASE_ANDROID_APP_ID'],
+      firebase_cli_token: ENV['FIREBASE_CLI_TOKEN'],
+      testers: ENV['FIREBASE_TESTERS']
+    )
+
+    send_message(text: text)
+  end
+
+
+  desc "Deploy a new  RELEASE version to the Firebase"
+  lane :release_android do
+    packageJson = load_json(json_path: "../package.json")
+    text = "New RELEASE android build of '#{ENV['DISPLAY_NAME']}' was successfully uploaded to the Firebase.\n"\
+          "Version: #{packageJson["android_version"]}\n"\
+          "Build: #{packageJson["build"]}\n"\
+          "Ready for testing."
+
+    gradle(
+      task: "clean assembleRelease",
+      properties:{
+        "versionCode" => packageJson["build"],
+        "versionName" => packageJson["android_version"]
+      }
+    )
+
+    icon
+    firebase_app_distribution(
+      app: ENV['FIREBASE_ANDROID_APP_ID'],
+      firebase_cli_token: ENV['FIREBASE_CLI_TOKEN'],
+      testers: ENV['FIREBASE_TESTERS']
+    )
+    # upload_to_play_store(track: 'beta')
+    send_message(text: text)
+  end
+end
